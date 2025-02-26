@@ -11,6 +11,7 @@ import string
 from rest_framework.pagination import PageNumberPagination
 from django.core.paginator import Paginator
 from django.core.cache import cache
+from .tasks import send_order_confirmation_email
 
 # generate order number
 def generate_order_number():
@@ -30,22 +31,8 @@ class OrderCreateView(GenericAPIView):
             order_number = generate_order_number()
             order = serializer.save(order_number=order_number)
 
-            # constructing email body
-            email_body = f"Dear {request.user.username},\n\n"
-            email_body += f"Your order with order number {order_number} has been created successfully.\n\n"
-            email_body += "Order Details:\n"
-            for item in order.items.all():
-                email_body += f"- {item.product.name}: {item.quantity} x ${item.price}\n"
-            email_body += f"\nTotal Price: ${order.total_price}\n\n"
-            email_body += "Thank you for shopping with us!\n"
-            email_body += "Best regards,\nFlora E-commerce Team"
+            send_order_confirmation_email.delay(order.id)
 
-            order_confirm_mail = EmailMessage(
-                subject=f"Order {order_number} Created Successfully",
-                body= email_body,
-                to= [request.user.email]
-            )
-            order_confirm_mail.send()
             return Response(
                 {
                     "message": "Order Created Successfully",

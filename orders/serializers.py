@@ -42,7 +42,7 @@ class OrderSerializer(serializers.ModelSerializer):
         address_data = validated_data.pop("address_data", None)
         address = None
 
-        if address_data:
+        if address_data and any(address_data.values()):
             address_serializer = AddressSerializer(data=address_data)
             address_serializer.is_valid(raise_exception=True)
             address = address_serializer.save(user=user)

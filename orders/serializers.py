@@ -3,8 +3,7 @@ from .models import Order, OrderItem
 from carts.models import Cart, CartItem
 from users.models import Address
 from users.serializers import AddressSerializer
-import random
-import string
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -51,7 +50,6 @@ class OrderSerializer(serializers.ModelSerializer):
         elif address_id:
             try:
                 address = Address.objects.get(id=address_id.id, user=user)
-                print(address)
             except Address.DoesNotExist:
                 raise serializers.ValidationError("Address does not exist")
             
@@ -83,7 +81,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
         cart.delete()
 
-        return order       
+        return order     
+      
     def update(self, instance, validated_data):
         request = self.context.get("request")
         user = request.user
@@ -93,7 +92,7 @@ class OrderSerializer(serializers.ModelSerializer):
         address_data = validated_data.pop("address_data", None)
 
         # Allow updating address with new one
-        if address_data:
+        if address_data and any(address_data.values()):
             address_serializer = AddressSerializer(data=address_data)
             address_serializer.is_valid(raise_exception=True)
             address = address_serializer.save(user=user)  # Create new address
@@ -105,7 +104,6 @@ class OrderSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Address does not exist")
         else:
             address = instance.address
-
         instance.address = address
         instance.save()
         return instance

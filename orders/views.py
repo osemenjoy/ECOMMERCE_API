@@ -102,7 +102,6 @@ class OrderDetailsView(GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        user = request.user
         order = self.get_object()
         if request.user != order.user:
             return Response(
@@ -208,7 +207,7 @@ class OrderCancelView(GenericAPIView):
 class OrderSearchView(GenericAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
-    queryset = Order.objects.all()
+    queryset = Order.objects.all().order_by("-created_at")
 
     def get(self, request):
         try:

@@ -166,8 +166,15 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
-
+    'PAGE_SIZE': 10,
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",  
+        "rest_framework.throttling.UserRateThrottle",  
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "10/minute",  
+        "user": "100/hour",   
+    },
 }
 
 # simple jwt configuration
@@ -206,3 +213,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API documentation for an Ecommerce', 
     'VERSION': '1.0.0', 
     }
+
+# Redis as Celery broker
+CELERY_BROKER_URL = "redis://localhost:6380/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6380/0"
